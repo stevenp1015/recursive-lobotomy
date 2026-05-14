@@ -12,27 +12,48 @@ def run_applescript(script):
     return process.stdout.strip()
 
 def broadcast_tweet(text):
+    if len(text) > 280:
+        print(f"ERROR: Text too long ({len(text)}). Truncating for forensic compliance.")
+        text = text[:277] + "..."
+        
     print(f"Native broadcast attempt: {text[:50]}...")
     # 1. Navigate to X compose in Safari
     nav_script = f'tell application "Safari" to set URL of front document to "https://x.com/compose/post"'
     run_applescript(nav_script)
-    time.sleep(8) # Wait for page load
+    time.sleep(12) # Robust wait for page load and hydration
     
-    # 2. Inject JS to type and click
-    # This requires "Allow JavaScript from Apple Events" enabled in Safari Develop menu.
+    # 2. Inject JS with character count and UI state verification
     js_payload = f"""
-    var box = document.querySelector('div[data-testid="tweetTextarea_0"]');
-    if (box) {{
+    (function() {{
+        var box = document.querySelector('div[data-testid="tweetTextarea_0"]');
+        if (!box) return "ERROR: BOX_NOT_FOUND";
+        
         box.focus();
+        // Clear anything that might be there
+        document.execCommand('selectAll', false, null);
+        document.execCommand('delete', false, null);
+        
+        // Insert new text
         document.execCommand('insertText', false, {json.dumps(text)});
-        setTimeout(() => {{
-            var btn = document.querySelector('div[data-testid="tweetButtonInline"]');
-            if (btn) btn.click();
-        }}, 1500);
-        "SUCCESS";
-    }} else {{
-        "BOX_NOT_FOUND";
-    }}
+        
+        // Trigger React events
+        box.dispatchEvent(new Event('input', {{ bubbles: true }}));
+        
+        var result = "INJECTION_COMPLETE";
+        var btn = document.querySelector('div[data-testid="tweetButtonInline"]');
+        
+        if (btn) {{
+            if (btn.disabled) {{
+                result = "ERROR: BUTTON_DISABLED (Check length or auth)";
+            }} else {{
+                btn.click();
+                result = "SUCCESS: CLICKED";
+            }}
+        }} else {{
+            result = "ERROR: BUTTON_NOT_FOUND";
+        }}
+        return result;
+    }})();
     """
     inject_script = f'tell application "Safari" to do JavaScript {json.dumps(js_payload)} in front document'
     result = run_applescript(inject_script)
