@@ -1,37 +1,76 @@
 body {
-    background-color: #000;
-    color: #39FF14;
-    font-family: 'Courier New', Courier, monospace;
+
+    background: linear-gradient(150deg, #302020 5%, #111 95%);
+    color:hsl(180, 100%, 44%);
+    background-clip: text;
+    font-family: 'Montserrat', sans-serif;
     line-height: 1.6;
     max-width: 800px;
     margin: 40px auto;
-    padding: 20px;
+    padding: 10px;
     border: 1px solid #333;
 }
 
 header {
-    border-bottom: 2px solid #39FF14;
-    padding-bottom: 20px;
-    margin-bottom: 30px;
+    border-bottom: 2px solid #dca540;
+    padding-bottom: 14px;
+    margin-bottom: 10px;
 }
 
 h1, h2, h3 {
     text-transform: uppercase;
     letter-spacing: 2px;
+    font-size: 5em;
+    line-height: 0.9em;
+    font-weight: bold;
+    perspective: 1000px;
+    transform: rotateX(8deg) rotateY(10deg);
+    transform-style: preserve-3d;
+    color: transparent;
+    background: linear-gradient(90deg, #9baa99ee, #038c8cee);   
+    background-clip: text; 
+    stroke: 1px #333;
+    stroke-width: 2px;
+    text-shadow: 2px 2px 4px rgba(136, 255, 109, 0.145);
+    drop-shadow: 2px 2px 4px rgba(109, 255, 255, 0.145);
+
 }
+.text-rotate {
+    animation: textrotate 5s linear infinite;
+}   
+
+ @keyframes textrotate {
+        0% {
+            transform: rotateX(8deg) rotateY(10deg) translateZ(0);
+        }
+        50% {
+            transform: rotateX(8deg) rotateY(10deg) translateZ(20px);
+        }
+        100% {
+            transform: rotateX(8deg) rotateY(10deg) translateZ(0);
+        }   ;
+        
+    }
 
 a {
-    color: #00FFFF;
+    color: transparent;
+    background: linear-gradient(90deg, #39FF14ee, #00FFFFee);
+    background-clip: text;
     text-decoration: none;
+    transform: scale(1);
+    transition: transform 0.3s ease;
 }
 
 a:hover {
-    background-color: #00FFFF;
-    color: #000;
+    background: conic-gradient(from 0deg, #39FF14ee, #00FFFFee);
+    color: transparent;
+    background-clip: text;
+    transform: scale(1.2);
+    transition: transform 0.4s ease;
 }
 
 .post-meta {
-    color: #888;
+    color: #e7e7e7;
     font-size: 0.8em;
 }
 
@@ -42,7 +81,7 @@ a:hover {
 
 .post-item {
     margin-bottom: 20px;
-    border-left: 3px solid #333;
+    border-left: 3px solid #454;
     padding-left: 15px;
 }
 
@@ -52,8 +91,8 @@ a:hover {
 
 footer {
     margin-top: 50px;
-    border-top: 1px solid #333;
+    border-top: 1px solid #555;
     padding-top: 20px;
     font-size: 0.7em;
-    color: #555;
+    color: #999;
 }
