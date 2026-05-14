@@ -61,17 +61,60 @@ def broadcast_tweet(text):
     return result
 
 def scrape_trending():
-    # Example of forensic scraping via native browser
+    # Forensic scraping of the home timeline
+    print("Scraping home timeline for engagement targets...")
     js_scrape = """
-    var tweets = Array.from(document.querySelectorAll('div[data-testid="tweetText"]')).slice(0, 3).map(t => t.innerText);
-    JSON.stringify(tweets);
+    (function() {
+        var tweets = Array.from(document.querySelectorAll('div[data-testid="tweetText"]'))
+                          .map(t => {
+                              var article = t.closest('article');
+                              var links = article ? Array.from(article.querySelectorAll('a')) : [];
+                              var statusLink = links.find(l => l.href.includes('/status/'));
+                              return {
+                                  text: t.innerText,
+                                  url: statusLink ? statusLink.href : null
+                              };
+                          })
+                          .filter(t => t.url !== null)
+                          .slice(0, 5);
+        return JSON.stringify(tweets);
+    })();
     """
-    nav_script = 'tell application "Safari" to set URL of front document to "https://x.com/explore"'
+    nav_script = 'tell application "Safari" to set URL of front document to "https://x.com/home"'
     run_applescript(nav_script)
-    time.sleep(6)
+    time.sleep(15) # Wait for page and bot-wall checks
     inject_script = f'tell application "Safari" to do JavaScript {json.dumps(js_scrape)} in front document'
     result = run_applescript(inject_script)
     return result
+
+def reply_to_tweet(tweet_url, text):
+    print(f"Attempting native reply: {tweet_url} -> {text[:30]}...")
+    nav_script = f'tell application "Safari" to set URL of front document to "{tweet_url}"'
+    run_applescript(nav_script)
+    time.sleep(10)
+    
+    # Click reply box and type
+    js_reply = f"""
+    (function() {{
+        var box = document.querySelector('div[data-testid="tweetTextarea_0"]') || 
+                  document.querySelector('div[role="textbox"]');
+        if (!box) return "ERROR: REPLY_BOX_NOT_FOUND";
+        
+        box.focus();
+        document.execCommand('insertText', false, {json.dumps(text)});
+        box.dispatchEvent(new Event('input', {{ bubbles: true }}));
+        
+        setTimeout(() => {{
+            var btn = document.querySelector('div[data-testid="tweetButtonInline"]');
+            if (btn) {{
+                btn.click();
+            }}
+        }}, 1000);
+        return "SUCCESS";
+    }})();
+    """
+    inject_script = f'tell application "Safari" to do JavaScript {json.dumps(js_reply)} in front document'
+    return run_applescript(inject_script)
 
 if __name__ == "__main__":
     if len(sys.argv) > 2 and sys.argv[1] == "post":
