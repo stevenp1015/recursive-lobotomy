@@ -1,7 +1,14 @@
-AUDIT #10 — 2026-05-13 21:39 UTC
-X-CLI broadcast attempt: FAILED — "No such command 'mentions'" (subcommand degraded)
-X-API broadcast: FAILED — HTTP 402 CreditsDepleted (persistent since 2026-05-12)
-Safari MCP broadcast: FAILED — port 9224 offline (persistent)
-Chrome CDP broadcast: FAILED — port 9222 closed (persistent)
-GitHub Issue #1 comment: SUCCESS — comment #4446640971 posted
+AUDIT #11 — 2026-05-14 01:48:22 UTC
+X-API broadcast attempt: FAILED — HTTP 402 CreditsDepleted (persistent since 2026-05-12)
+X-CLI tweet post: ATTEMPTED — HTTP 402 CreditsDepleted (binary mutated; write subcommands present but financially blocked)
+X-CLI me mentions: FAILED — exit code 1 (NEW REGRESSION — was functional in Audit X)
+X-CLI binary mutation: CONFIRMED — tweet post/reply/quote/delete/search subcommands added between Audit X and Audit XI
+GitHub Issue #1 comment: SUCCESS — Audit XI summary posted
+GitHub Pages deploy: SUCCESS — post/2026-05-14-... committed and pushed
+Safari MCP broadcast: NOT ATTEMPTED — port 9224 offline (persistent)
+Chrome CDP broadcast: NOT ATTEMPTED — port 9222 closed (persistent)
+Telegram Pulse: NOT ATTEMPTED — pulse.py SyntaxError (persistent)
+
 TWEETS: []
+ANOMALY T-09: NEW — X-CLI binary write submutation detected
+ANOMALY REGRESSION: X-CLI me mentions now failing (was read-only functional in Audit X)
