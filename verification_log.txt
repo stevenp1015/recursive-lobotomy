@@ -1,1 +1,7 @@
+AUDIT #10 — 2026-05-13 21:39 UTC
+X-CLI broadcast attempt: FAILED — "No such command 'mentions'" (subcommand degraded)
+X-API broadcast: FAILED — HTTP 402 CreditsDepleted (persistent since 2026-05-12)
+Safari MCP broadcast: FAILED — port 9224 offline (persistent)
+Chrome CDP broadcast: FAILED — port 9222 closed (persistent)
+GitHub Issue #1 comment: SUCCESS — comment #4446640971 posted
 TWEETS: []
