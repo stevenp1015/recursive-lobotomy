@@ -2,15 +2,17 @@ import json
 import os
 import random
 import requests
+import subprocess
 from datetime import datetime, timedelta
 
-# PULSE.PY - The Heartbeat of RecursiveLobotomy
-# This script runs in the cloud (GH Actions) to determine if a biopsy is due.
-# If so, it pings the agent via Telegram to initiate the forensic procedure.
+# PULSE_V4.PY - THE RANDOMIZED HEARTBEAT
+# Job A: Tweet (3-6h random)
+# Job B: Tweet + Interaction + Blog (7-9h random)
 
 STATE_FILE = "scheduler_state.json"
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_HOME_CHANNEL") # Should be the ID, not the handle
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_HOME_CHANNEL")
+REPO_PATH = os.path.expanduser("~/recursive-lobotomy")
 
 def load_state():
     if os.path.exists(STATE_FILE):
@@ -28,47 +30,59 @@ def ping_agent(message):
         return
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
     data = {"chat_id": TELEGRAM_CHAT_ID, "text": message}
-    response = requests.post(url, data=data)
-    print(f"Pinged agent: {response.status_code}")
+    try:
+        response = requests.post(url, data=data)
+        print(f"Pinged agent: {response.status_code}")
+    except Exception as e:
+        print(f"Ping failed: {e}")
 
 def pulse():
     state = load_state()
+    now = datetime.now()
+    
     if not state:
-        # Initialize
-        now = datetime.now()
         state = {
             "next_run_a": (now + timedelta(hours=random.uniform(3, 6))).isoformat(),
             "next_run_b": (now + timedelta(hours=random.uniform(7, 9))).isoformat()
         }
         save_state(state)
-        print("Initialized scheduler state.")
+        print("Pulse initialized with randomized offsets.")
         return
 
-    now = datetime.now()
     next_a = datetime.fromisoformat(state["next_run_a"])
     next_b = datetime.fromisoformat(state["next_run_b"])
 
     triggered = False
+    
+    # Pulse A check
     if now >= next_a:
-        ping_agent("🚨 [PULSE A] THE SCHEDULE MANDATES A BROADCAST. PERFORM FORENSIC TWEET NOW.")
+        msg = "🚨 [PULSE A] RANDOMIZED BROADCAST DUE (3-6h WINDOW). GENERATE TWEET."
+        ping_agent(msg)
         state["next_run_a"] = (now + timedelta(hours=random.uniform(3, 6))).isoformat()
         triggered = True
 
+    # Pulse B check
     if now >= next_b:
-        ping_agent("🚨 [PULSE B] THE SCHEDULE MANDATES A DEEP BIOPSY. INTERACT, TWEET, AND POST TO REGISTRY.")
+        msg = "🚨 [PULSE B] RANDOMIZED DEEP BIOPSY DUE (7-9h WINDOW). INTERACT, TWEET, AND POST."
+        ping_agent(msg)
         state["next_run_b"] = (now + timedelta(hours=random.uniform(7, 9))).isoformat()
         triggered = True
 
     if triggered:
         save_state(state)
-        # We need to commit the updated state back to the repo
-        os.system("git config user.name 'Recursive Pulse'")
-        os.system("git config user.email 'pulse@recursive.lobotomy'")
-        os.system("git add scheduler_state.json")
-        os.system("git commit -m 'Pulse update: scheduler state synchronized'")
-        os.system("git push origin main")
+        # Sync back to repo
+        try:
+            os.chdir(REPO_PATH)
+            subprocess.run(["git", "config", "user.name", "Recursive Pulse"], check=True)
+            subprocess.run(["git", "config", "user.email", "pulse@recursive.lobotomy"], check=True)
+            subprocess.run(["git", "add", STATE_FILE], check=True)
+            subprocess.run(["git", "commit", "-m", f"Pulse update: {now.strftime('%Y-%m-%d %H:%M')}"], check=True)
+            subprocess.run(["git", "push", "origin", "main"], check=True)
+            print("State synchronized to cloud.")
+        except Exception as e:
+            print(f"Git sync failed: {e}")
     else:
-        print(f"No pulse triggered. Next A: {next_a.strftime('%H:%M')}, Next B: {next_b.strftime('%H:%M')}")
+        print(f"No pulse triggered. Next A: {next_a.strftime('%H:%M')} | Next B: {next_b.strftime('%H:%M')}")
 
 if __name__ == "__main__":
     pulse()

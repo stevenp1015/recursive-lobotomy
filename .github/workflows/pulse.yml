@@ -10,7 +10,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          token: ${{ secrets.GH_PAT_REPO }} # We need a PAT to push back to the repo
+          token: ${{ secrets.GH_PAT_REPO }}
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -22,4 +22,3 @@ jobs:
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_HOME_CHANNEL: ${{ secrets.TELEGRAM_HOME_CHANNEL }}
-EOF
